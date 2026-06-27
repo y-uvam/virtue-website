@@ -29,9 +29,9 @@ export const SiteSettings: React.FC = () => {
   const toast = useToast();
 
   // General Settings
-  const [siteName, setSiteName] = useState("SMM Panel Pro");
+  const [siteName, setSiteName] = useState("Virtue");
   const [siteTagline, setSiteTagline] = useState("Grow Smarter. Grow Faster.");
-  const [supportEmail, setSupportEmail] = useState("support@smmpanel.pro");
+  const [supportEmail, setSupportEmail] = useState("support@virtue.com");
   const [maintenanceMode, setMaintenanceMode] = useState("disabled");
   const [newUserBonus, setNewUserBonus] = useState("0");
   const [referralBonus, setReferralBonus] = useState("50");

@@ -49,12 +49,6 @@ export const LandingPage: React.FC = () => {
   const platforms = [
     { name: "Instagram", services: "120 Services", icon: "instagram" },
     { name: "YouTube", services: "95 Services", icon: "youtube" },
-    { name: "TikTok", services: "80 Services", icon: "tiktok" },
-    { name: "Facebook", services: "60 Services", icon: "facebook" },
-    { name: "Twitter / X", services: "45 Services", icon: "twitter" },
-    { name: "Telegram", services: "30 Services", icon: "telegram" },
-    { name: "Spotify", services: "25 Services", icon: "spotify" },
-    { name: "LinkedIn", services: "15 Services", icon: "linkedin" },
   ];
 
   const previewServices: PreviewService[] = [
@@ -62,8 +56,6 @@ export const LandingPage: React.FC = () => {
     { id: "2", platform: "Instagram", name: "Instagram Likes [Super Fast / Safe]", rate: 45.00, min: 50, max: 25000 },
     { id: "3", platform: "YouTube", name: "YouTube Subscribers [Non-Drop / Lifetime Refill]", rate: 1450.00, min: 50, max: 10000 },
     { id: "4", platform: "YouTube", name: "YouTube Organic High Retention Views", rate: 220.00, min: 1000, max: 500000 },
-    { id: "5", platform: "TikTok", name: "TikTok Followers [Speed: 10K/Day]", rate: 190.00, min: 100, max: 100000 },
-    { id: "6", platform: "TikTok", name: "TikTok Likes [Instant Start]", rate: 75.00, min: 100, max: 50000 },
   ];
 
   const previewColumns: TableColumn<PreviewService>[] = [
@@ -93,13 +85,12 @@ export const LandingPage: React.FC = () => {
     { title: STRINGS.LANDING.FEAT_PRICING_TITLE, desc: STRINGS.LANDING.FEAT_PRICING_DESC, icon: <Award size={20} className="text-secondary" /> },
     { title: STRINGS.LANDING.FEAT_SECURE_TITLE, desc: STRINGS.LANDING.FEAT_SECURE_DESC, icon: <ShieldCheck size={20} className="text-success" /> },
     { title: STRINGS.LANDING.FEAT_REFILL_TITLE, desc: STRINGS.LANDING.FEAT_REFILL_DESC, icon: <Heart size={20} className="text-pink-500" /> },
-    { title: STRINGS.LANDING.FEAT_API_TITLE, desc: STRINGS.LANDING.FEAT_API_DESC, icon: <Zap size={20} className="text-cyan-400" /> },
   ];
 
   const testimonials = [
-    { name: "Sarah Jenkins", role: "Digital Agency Director", text: "Best SMM panel by far! Order starts within minutes and customer support is incredibly responsive. Saved our client campaigns multiple times.", rating: 5 },
+    { name: "Sarah Jenkins", role: "Digital Agency Director", text: "Best social growth platform by far! Order starts within minutes and customer support is incredibly responsive. Saved our client campaigns multiple times.", rating: 5 },
     { name: "David K.", role: "Social Media Influencer", text: "Extremely cheap rates and the views are very stable. The refill works flawlessly. My go-to platform for video boosts.", rating: 5 },
-    { name: "Rahul Sharma", role: "SMM Reseller Shop", text: "Integrate through API was simple. Prices are low enough that I make a 40% margin reselling. Highly recommended supplier.", rating: 5 },
+    { name: "Rahul Sharma", role: "Content Creator", text: "Our YouTube subscriber count and watch hours spiked within days of launching our campaign. Outstanding service quality and speed!", rating: 5 },
   ];
 
   const faqs = [
@@ -112,20 +103,27 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="space-y-24 py-10">
       {/* Hero Section */}
-      <section className="text-center max-w-4xl mx-auto space-y-6 pt-10">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-xs font-semibold text-primary-light">
-          <Zap size={12} className="animate-pulse" />
+      <section className="text-center max-w-4xl mx-auto space-y-6 pt-16 pb-6 relative overflow-hidden">
+        {/* Creative Glow Meshes */}
+        <div className="absolute top-0 left-1/4 w-[350px] h-[350px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-4 right-1/4 w-[300px] h-[300px] bg-secondary/8 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-primary/20 bg-primary/10 text-xs font-bold text-primary shadow-sm relative z-10">
+          <Zap size={12} className="animate-pulse text-secondary" />
           {STRINGS.APP.TAGLINE}
         </div>
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight text-white">
-          {STRINGS.LANDING.HERO_TITLE}
+        
+        <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight text-textPrimary relative z-10">
+          Boost Your <span className="bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">Social Media</span> Presence Today
         </h1>
-        <p className="text-sm sm:text-lg text-textSecondary leading-relaxed max-w-2xl mx-auto">
+        
+        <p className="text-sm sm:text-base text-textSecondary leading-relaxed max-w-2xl mx-auto relative z-10 font-medium">
           {STRINGS.LANDING.HERO_SUBTITLE}
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+        
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-4 relative z-10">
           <Link to={ROUTES.REGISTER}>
-            <Button size="lg" variant="primary">
+            <Button size="lg" variant="primary" className="shadow-primary/20">
               {STRINGS.LANDING.CTA_GET_STARTED}
             </Button>
           </Link>

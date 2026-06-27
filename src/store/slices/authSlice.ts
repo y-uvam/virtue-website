@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { type MockUser, dbGet, dbSet, getActiveUser, setActiveUser } from "../mockData";
+import { supabase } from "../../utils/supabase";
+import { type MockUser } from "../mockData";
 
 interface AuthState {
   user: MockUser | null;
@@ -9,39 +10,106 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: getActiveUser(),
-  isAuthenticated: !!getActiveUser(),
+  user: null,
+  isAuthenticated: false,
   loading: false,
   error: null,
 };
 
-const delay = (ms = 500) => new Promise((res) => setTimeout(res, ms));
+// Maps Supabase profiles table data to client-side MockUser format
+export const mapProfileToUser = (profile: any, emailVerified = false): MockUser => {
+  const isAdmin = !!profile.is_admin;
+  return {
+    id: profile.id,
+    name: profile.name,
+    username: profile.username,
+    email: profile.email,
+    isAdmin,
+    role: isAdmin ? "admin" : "user",
+    balance: Number(profile.balance || 0),
+    api_key: profile.api_key || "",
+    referral_code: profile.referral_code || "",
+    referred_by: profile.referred_by || undefined,
+    status: profile.status || "active",
+    email_verified: emailVerified,
+    created_at: profile.created_at || new Date().toISOString(),
+  };
+};
 
+// Login user thunk with Supabase (supports both username and email login)
 export const loginUser = createAsyncThunk(
   "auth/login",
-  async ({ emailOrUsername, password: _password }: { emailOrUsername: string; password: string }, { rejectWithValue }) => {
-    await delay();
-    const users = dbGet<MockUser[]>("smm_users");
-    const user = users.find(
-      (u) =>
-        (u.email.toLowerCase() === emailOrUsername.toLowerCase() ||
-          u.username.toLowerCase() === emailOrUsername.toLowerCase())
-    );
+  async (
+    { emailOrUsername, password }: { emailOrUsername: string; password: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      let email = emailOrUsername;
+      
+      // If the input is not a direct email, resolve it from the profiles table
+      if (!emailOrUsername.includes("@")) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("username", emailOrUsername)
+          .single();
+        if (profile) {
+          email = profile.email;
+        }
+      }
 
-    if (!user) {
-      return rejectWithValue("Invalid credentials. Try 'user@smm.com' or 'admin@smm.com'.");
+      // Supabase Auth call
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) return rejectWithValue(error.message);
+      if (!data.user) return rejectWithValue("Login failed. User session empty.");
+
+      // Fetch user profile info
+      let profile = null;
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
+        if (!profileError && profileData) {
+          profile = profileData;
+        }
+      } catch (err) {
+        console.warn("Could not retrieve profile from database, using fallback:", err);
+      }
+
+      if (!profile) {
+        profile = {
+          id: data.user.id,
+          name: data.user.user_metadata?.full_name || "User",
+          username: data.user.user_metadata?.username || "user_" + data.user.id.substring(0, 6),
+          email: data.user.email || "",
+          is_admin: false,
+          balance: 0.00,
+          api_key: "",
+          referral_code: "",
+          status: "active",
+          created_at: data.user.created_at,
+        };
+      }
+
+      if (profile.status === "banned") {
+        await supabase.auth.signOut();
+        return rejectWithValue("Your account has been suspended. Please contact support.");
+      }
+
+      return mapProfileToUser(profile, !!data.user.email_confirmed_at);
+    } catch (err: any) {
+      return rejectWithValue(err.message || "An unexpected error occurred during login.");
     }
-
-    if (user.status === "banned") {
-      return rejectWithValue("Your account has been suspended. Please contact support.");
-    }
-
-    // Simulate password validation (for mock purposes, we allow any password for initial user or admin)
-    setActiveUser(user);
-    return user;
   }
 );
 
+// Register user thunk with Supabase
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (
@@ -49,7 +117,7 @@ export const registerUser = createAsyncThunk(
       fullName,
       email,
       username,
-      password: _password,
+      password,
       referredBy,
     }: {
       fullName: string;
@@ -60,128 +128,202 @@ export const registerUser = createAsyncThunk(
     },
     { rejectWithValue }
   ) => {
-    await delay();
-    const users = dbGet<MockUser[]>("smm_users");
-    
-    if (users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
-      return rejectWithValue("An account with this email address already exists.");
-    }
-    if (users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
-      return rejectWithValue("This username is already taken.");
-    }
+    try {
+      // 1. Supabase Auth signup
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            username,
+          },
+        },
+      });
 
-    const newUser: MockUser = {
-      id: `u-${Math.random().toString(36).substring(2, 9)}`,
-      name: fullName,
-      email,
-      username,
-      role: "user",
-      balance: 0.00,
-      api_key: `smm_live_${Math.random().toString(36).substring(2, 20)}`,
-      referral_code: `REF${Math.floor(1000 + Math.random() * 9000)}`,
-      referred_by: referredBy || undefined,
-      email_verified: false,
-      status: "active",
-      created_at: new Date().toISOString(),
-    };
+      if (error) return rejectWithValue(error.message);
+      if (!data.user) return rejectWithValue("Sign up failed.");
 
-    users.push(newUser);
-    dbSet("smm_users", users);
-    
-    // Automatically log in the user (or simulate sending verification email)
-    setActiveUser(newUser);
-    return newUser;
+      // 2. Fallback client-side insertion check
+      // Our database trigger automatically provisions profiles, but this guarantees client safety
+      try {
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
+
+        if (existingProfile) {
+          return mapProfileToUser(existingProfile, !!data.user.email_confirmed_at);
+        }
+
+        const newProfile = {
+          id: data.user.id,
+          name: fullName,
+          username,
+          email,
+          role: "user",
+          is_admin: false,
+          balance: 0.00,
+          api_key: `smm_live_${Math.random().toString(36).substring(2, 20)}`,
+          referral_code: `REF${Math.floor(1000 + Math.random() * 9000)}`,
+          referred_by: referredBy || null,
+          status: "active",
+        };
+
+        const { data: profile, error: insertError } = await supabase
+          .from("profiles")
+          .insert(newProfile)
+          .select("*")
+          .single();
+
+        if (insertError) {
+          throw new Error(insertError.message);
+        }
+
+        return mapProfileToUser(profile, !!data.user.email_confirmed_at);
+      } catch (profileErr: any) {
+        console.warn("Profile fetch/create failed, falling back to temp user:", profileErr);
+        // Fallback to avoid breaking signup if PostgREST cache has not updated
+        const fallbackProfile = {
+          id: data.user.id,
+          name: fullName,
+          username,
+          email,
+          is_admin: false,
+          balance: 0.00,
+          api_key: "",
+          referral_code: "",
+          status: "active",
+          created_at: new Date().toISOString(),
+        };
+        return mapProfileToUser(fallbackProfile, !!data.user.email_confirmed_at);
+      }
+    } catch (err: any) {
+      return rejectWithValue(err.message || "An unexpected error occurred during signup.");
+    }
   }
 );
 
+// Update profile information thunk
 export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
-  async ({ name, email, username }: { name: string; email: string; username: string }, { getState, rejectWithValue }) => {
-    await delay();
-    const state = getState() as { auth: AuthState };
-    if (!state.auth.user) return rejectWithValue("Not logged in");
+  async (
+    { name, email, username }: { name: string; email: string; username: string },
+    { getState, rejectWithValue }
+  ) => {
+    try {
+      const state = getState() as { auth: AuthState };
+      if (!state.auth.user) return rejectWithValue("Not logged in");
 
-    const users = dbGet<MockUser[]>("smm_users");
-    const userIdx = users.findIndex((u) => u.id === state.auth.user!.id);
-    if (userIdx === -1) return rejectWithValue("User not found");
+      // Update public.profiles
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({ name, email, username })
+        .eq("id", state.auth.user.id)
+        .select("*")
+        .single();
 
-    // Check unique email/username
-    const otherEmail = users.find((u) => u.id !== state.auth.user!.id && u.email.toLowerCase() === email.toLowerCase());
-    if (otherEmail) return rejectWithValue("Email is already taken by another account.");
+      if (error) return rejectWithValue(error.message);
 
-    const otherUsername = users.find((u) => u.id !== state.auth.user!.id && u.username.toLowerCase() === username.toLowerCase());
-    if (otherUsername) return rejectWithValue("Username is already taken.");
-
-    users[userIdx].name = name;
-    users[userIdx].email = email;
-    users[userIdx].username = username;
-
-    dbSet("smm_users", users);
-    setActiveUser(users[userIdx]);
-    return users[userIdx];
+      return mapProfileToUser(data, state.auth.user.email_verified);
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to update profile settings.");
+    }
   }
 );
 
+// Regenerate API keys thunk
 export const regenerateApiKey = createAsyncThunk(
   "auth/regenerateApiKey",
   async (_, { getState, rejectWithValue }) => {
-    await delay();
-    const state = getState() as { auth: AuthState };
-    if (!state.auth.user) return rejectWithValue("Not logged in");
+    try {
+      const state = getState() as { auth: AuthState };
+      if (!state.auth.user) return rejectWithValue("Not logged in");
+      
+      const newKey = `smm_live_${Math.random().toString(36).substring(2, 20)}`;
 
-    const users = dbGet<MockUser[]>("smm_users");
-    const userIdx = users.findIndex((u) => u.id === state.auth.user!.id);
-    if (userIdx === -1) return rejectWithValue("User not found");
+      const { error } = await supabase
+        .from("profiles")
+        .update({ api_key: newKey })
+        .eq("id", state.auth.user.id);
 
-    const newKey = `smm_live_${Math.random().toString(36).substring(2, 20)}`;
-    users[userIdx].api_key = newKey;
-
-    dbSet("smm_users", users);
-    setActiveUser(users[userIdx]);
-    return newKey;
+      if (error) return rejectWithValue(error.message);
+      return newKey;
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to regenerate API key.");
+    }
   }
 );
 
+// Change user password thunk
 export const changePassword = createAsyncThunk(
   "auth/changePassword",
-  async ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) => {
-    await delay();
-    // Simulate updating password successfully
-    return true;
-  }
-);
-
-export const verifyEmailToken = createAsyncThunk(
-  "auth/verifyEmail",
-  async (token: string, { rejectWithValue }) => {
-    await delay(1500); // give it slightly longer to feel like a real verification redirect
-    if (token === "invalid" || token.includes("expired")) {
-      return rejectWithValue("This verification token is invalid or has expired.");
+  async (
+    { currentPassword: _currentPassword, newPassword }: { currentPassword: string; newPassword: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) return rejectWithValue(error.message);
+      return true;
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to update password.");
     }
-    return true;
   }
 );
 
+// Sign Out thunk
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) return rejectWithValue(error.message);
+      return true;
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to log out.");
+    }
+  }
+);
+
+// Forgotten password link dispatch
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email: string, { rejectWithValue }) => {
-    await delay();
-    const users = dbGet<MockUser[]>("smm_users");
-    const exists = users.some((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (!exists) {
-      return rejectWithValue("No account associated with this email address was found.");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) return rejectWithValue(error.message);
+      return true;
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to send reset link.");
     }
-    return true;
   }
 );
 
+// Finalize password reset thunk
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
-  async ({ token, newPass: _newPass }: { token: string; newPass: string }, { rejectWithValue }) => {
-    await delay();
-    if (token === "invalid" || token.includes("expired")) {
-      return rejectWithValue("The password reset link is invalid or expired.");
+  async (
+    { token: _token, newPass }: { token: string; newPass: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPass });
+      if (error) return rejectWithValue(error.message);
+      return true;
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to reset password.");
     }
+  }
+);
+
+// Verify email thunk
+export const verifyEmailToken = createAsyncThunk(
+  "auth/verifyEmail",
+  async (token: string, { rejectWithValue }) => {
     return true;
   }
 );
@@ -190,20 +332,18 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    logoutUser: (state) => {
-      state.user = null;
-      state.isAuthenticated = false;
-      state.error = null;
-      setActiveUser(null);
-    },
     clearAuthError: (state) => {
       state.error = null;
     },
     syncUserBalance: (state, action: PayloadAction<number>) => {
       if (state.user) {
         state.user.balance = action.payload;
-        setActiveUser(state.user);
       }
+    },
+    setSessionUser: (state, action: PayloadAction<MockUser | null>) => {
+      state.user = action.payload;
+      state.isAuthenticated = !!action.payload;
+      state.loading = false;
     },
   },
   extraReducers: (builder) => {
@@ -252,9 +392,15 @@ const authSlice = createSlice({
       // API Key
       .addCase(regenerateApiKey.fulfilled, (state, action: PayloadAction<string>) => {
         if (state.user) state.user.api_key = action.payload;
+      })
+      // Logout
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.loading = false;
       });
   },
 });
 
-export const { logoutUser, clearAuthError, syncUserBalance } = authSlice.actions;
+export const { clearAuthError, syncUserBalance, setSessionUser } = authSlice.actions;
 export default authSlice.reducer;

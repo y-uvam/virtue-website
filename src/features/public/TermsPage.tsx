@@ -13,14 +13,14 @@ export const TermsPage: React.FC = () => {
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-white">1. Introduction</h2>
           <p className="text-xs sm:text-sm text-textSecondary leading-relaxed">
-            Welcome to SMM Panel. By accessing or using our services, you agree to comply with and be bound by the following terms and conditions. Please read these terms carefully before registering or purchasing services on our platform.
+            Welcome to Virtue. By accessing or using our services, you agree to comply with and be bound by the following terms and conditions. Please read these terms carefully before registering or purchasing services on our platform.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-white">2. Service Usage</h2>
           <p className="text-xs sm:text-sm text-textSecondary leading-relaxed">
-            - SMM Panel is only to be used to promote your social media profiles (followers, likes, views, etc.).
+            - Virtue is only to be used to promote your social media profiles (followers, likes, views, etc.).
             <br />
             - We do not guarantee that your new followers will interact with your posts or content. We only guarantee the numbers that you pay for.
             <br />
@@ -33,7 +33,7 @@ export const TermsPage: React.FC = () => {
           <p className="text-xs sm:text-sm text-textSecondary leading-relaxed">
             - All payments are final. Once funds are deposited to your wallet, they cannot be refunded to your original payment method (bank account, cards, crypto wallets). They must be consumed on our services.
             <br />
-            - If an order is failed, cancelled, or partial, the amount will be credited back to your SMM Panel wallet balance automatically.
+            - If an order is failed, cancelled, or partial, the amount will be credited back to your Virtue wallet balance automatically.
             <br />
             - You agree that you will not initiate a chargeback or dispute against us for any transaction. Doing so will result in immediate termination of your account and cancellation of all past or active orders.
           </p>

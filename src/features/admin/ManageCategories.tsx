@@ -218,12 +218,6 @@ export const ManageCategories: React.FC = () => {
             options={[
               { value: "instagram", label: "Instagram" },
               { value: "youtube", label: "YouTube" },
-              { value: "tiktok", label: "TikTok" },
-              { value: "facebook", label: "Facebook" },
-              { value: "twitter", label: "Twitter / X" },
-              { value: "telegram", label: "Telegram" },
-              { value: "spotify", label: "Spotify" },
-              { value: "linkedin", label: "LinkedIn" },
               { value: "globe", label: "General / Website" },
             ]}
             value={icon}

@@ -2,23 +2,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #6C3FEB;
-  --color-primary-light: #8B5CF6;
-  --color-primary-dark: #4C1D95;
-  --color-secondary: #F59E0B;
-  --color-success: #10B981;
-  --color-danger: #EF4444;
-  --color-warning: #F59E0B;
-  --color-info: #3B82F6;
-  --color-bg-dark: #0F0F1A;
-  --color-bg-card: #1A1A2E;
-  --color-bg-card-hover: #1E1E35;
-  --color-border: #2A2A45;
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #A0A0B8;
-  --color-text-muted: #6B6B8A;
+  --color-primary: #0284C7;
+  --color-primary-light: #0EA5E9;
+  --color-primary-dark: #0369A1;
+  --color-secondary: #B91C1C;
+  --color-success: #15803D;
+  --color-danger: #991B1B;
+  --color-warning: #C2410C;
+  --color-info: #0284C7;
+  --color-bg-dark: #F8FAFC;
+  --color-bg-card: #FFFFFF;
+  --color-bg-card-hover: #F1F5F9;
+  --color-border: #E2E8F0;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748B;
   
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Josefin Sans', system-ui, -apple-system, sans-serif;
   
   --animate-fade-in: fade-in 0.25s ease-out;
   --animate-slide-in: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -41,9 +41,9 @@
 /* Custom Base Styles */
 @layer base {
   body {
-    background-color: #0F0F1A;
-    color: #FFFFFF;
-    font-family: 'Inter', sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: 'Josefin Sans', sans-serif;
   }
   
   /* Custom scrollbar */
@@ -52,26 +52,61 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0F0F1A;
+    background: #F8FAFC;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2A2A45;
+    background: #CBD5E1;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #6B6B8A;
+    background: #94A3B8;
   }
 }
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(26, 26, 46, 0.6);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(42, 42, 69, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .glass-hover:hover {
-  background: rgba(30, 30, 53, 0.8);
-  border-color: rgba(108, 63, 235, 0.4);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(2, 132, 199, 0.4);
 }
+
+/* Light theme text contrast overrides to map legacy text-white classes to textPrimary */
+h1.text-white,
+h2.text-white,
+h3.text-white,
+h4.text-white,
+h5.text-white,
+h6.text-white,
+th.text-white,
+p.text-white,
+span.text-white:not(button *):not(.btn *):not(.badge *):not([class*="bg-"]):not([class*="from-"]),
+a.text-white:not(button *):not(.btn *):not(.badge *):not([class*="bg-"]):not([class*="from-"]) {
+  color: var(--color-text-primary) !important;
+}
+
+/* Premium background mesh for bg-bgDark pages */
+.bg-bgDark {
+  background-color: #F8FAFC !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.04) 0px, transparent 55%),
+    radial-gradient(at 50% 0%, rgba(14, 165, 233, 0.02) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.04) 0px, transparent 55%),
+    radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.01) 0px, transparent 50%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Elegant button and card transitions */
+button, .card, select, input {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+button:hover {
+  filter: brightness(1.03);
+  transform: translateY(-0.5px);
+}
+

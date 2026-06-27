@@ -19,6 +19,7 @@ import {
   Shield,
   Zap,
 } from "lucide-react";
+import { VirtueLogo } from "../common/VirtueLogo";
 import { ROUTES } from "../../constants/routes";
 import { STRINGS } from "../../constants/strings";
 import { useAppSelector, useAppDispatch } from "../../store";
@@ -49,11 +50,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     { label: STRINGS.DASHBOARD.NAV_NEW_ORDER, path: ROUTES.NEW_ORDER, icon: <PlusCircle size={18} /> },
     { label: STRINGS.DASHBOARD.NAV_ORDERS, path: ROUTES.ORDERS, icon: <ShoppingBag size={18} /> },
     { label: STRINGS.DASHBOARD.NAV_SERVICES, path: ROUTES.SERVICES, icon: <Layers size={18} /> },
-    { label: STRINGS.DASHBOARD.NAV_ADD_FUNDS, path: ROUTES.ADD_FUNDS, icon: <Wallet size={18} /> },
-    { label: STRINGS.DASHBOARD.NAV_TRANSACTIONS, path: ROUTES.TRANSACTIONS, icon: <History size={18} /> },
-    { label: STRINGS.DASHBOARD.NAV_SUPPORT, path: ROUTES.SUPPORT, icon: <HelpCircle size={18} /> },
-    { label: STRINGS.DASHBOARD.NAV_API, path: ROUTES.API_DOCS, icon: <Terminal size={18} /> },
-    { label: STRINGS.DASHBOARD.NAV_AFFILIATE, path: ROUTES.AFFILIATE, icon: <Users size={18} /> },
     { label: STRINGS.DASHBOARD.NAV_PROFILE, path: ROUTES.PROFILE, icon: <User size={18} /> },
   ];
 
@@ -77,10 +73,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-bgCard/60 backdrop-blur-md shrink-0">
         {/* Brand Header */}
         <div className="h-16 px-6 border-b border-border flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary to-info flex items-center justify-center shadow-md shadow-primary/20">
-            <Zap size={16} className="text-white fill-white/10" />
-          </div>
-          <span className="text-base font-bold text-white">{STRINGS.APP.NAME}</span>
+          <VirtueLogo size={38} />
+          <span className="text-base font-bold text-textPrimary">{STRINGS.APP.NAME}</span>
         </div>
 
         {/* Navigation links */}
@@ -89,12 +83,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             <NavLink
               key={item.path}
               to={item.path}
+              end
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer
                 ${
                   isActive
                     ? "bg-gradient-to-r from-primary/20 to-info/10 text-primary-light border-l-2 border-primary"
-                    : "text-textSecondary hover:text-white hover:bg-white/5"
+                    : "text-textSecondary hover:text-textPrimary hover:bg-bgDark/60"
                 }
               `
               }
@@ -120,7 +115,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         <div className="p-4 border-t border-border bg-bgDark/20">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-textSecondary hover:text-white hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-textSecondary hover:bg-red-500/10 hover:text-red-600 transition-colors cursor-pointer"
           >
             <LogOut size={18} />
             <span>{STRINGS.DASHBOARD.NAV_LOGOUT}</span>
@@ -137,12 +132,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <aside className="relative flex flex-col w-64 bg-bgCard border-r border-border h-full z-10 animate-slide-in">
             <div className="h-16 px-6 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary to-info flex items-center justify-center">
-                  <Zap size={16} className="text-white" />
-                </div>
-                <span className="text-sm font-bold text-white">{STRINGS.APP.NAME}</span>
+                <VirtueLogo size={36} />
+                <span className="text-sm font-bold text-textPrimary">{STRINGS.APP.NAME}</span>
               </div>
-              <button onClick={() => setIsSidebarOpen(false)} className="text-textMuted hover:text-white cursor-pointer">
+              <button onClick={() => setIsSidebarOpen(false)} className="text-textMuted hover:text-textPrimary cursor-pointer">
                 <X size={18} />
               </button>
             </div>
@@ -152,13 +145,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  end
                   onClick={() => setIsSidebarOpen(false)}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer
+                    `flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer
                     ${
                       isActive
                         ? "bg-gradient-to-r from-primary/20 to-info/10 text-primary-light border-l-2 border-primary"
-                        : "text-textSecondary hover:text-white hover:bg-white/5"
+                        : "text-textSecondary hover:text-textPrimary hover:bg-bgDark/60"
                     }
                   `
                   }
@@ -183,7 +177,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             <div className="p-4 border-t border-border bg-bgDark/20">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-textSecondary hover:text-white hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer"
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-textSecondary hover:bg-red-500/10 hover:text-red-600 transition-colors cursor-pointer"
               >
                 <LogOut size={18} />
                 <span>{STRINGS.DASHBOARD.NAV_LOGOUT}</span>
@@ -196,11 +190,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       {/* Main Workspace Frame */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Top Header Navbar */}
-        <header className="h-16 px-4 sm:px-6 border-b border-border bg-bgCard/30 backdrop-blur-md flex items-center justify-between shrink-0 sticky top-0 z-30">
+        <header className="h-16 px-4 sm:px-6 border-b border-border bg-bgCard/30 backdrop-blur-md flex items-center justify-between shrink-0 sticky top-0 z-40">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden text-textSecondary hover:text-white p-1 rounded hover:bg-white/5 cursor-pointer"
+              className="lg:hidden text-textSecondary hover:text-textPrimary p-1 rounded hover:bg-bgDark cursor-pointer"
             >
               <Menu size={20} />
             </button>
@@ -208,38 +202,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Wallet Balance Display Card */}
-            <div className="px-3.5 py-1.5 rounded-lg border border-border bg-bgDark/40 flex items-center gap-2">
-              <Wallet size={15} className="text-primary-light" />
-              <div className="flex flex-col text-right">
-                <span className="text-[10px] text-textMuted uppercase font-semibold tracking-wider">
-                  {STRINGS.DASHBOARD.WALLET_BALANCE}
-                </span>
-                <span className="text-xs sm:text-sm font-bold text-white">
-                  ₹{Number(user?.balance ?? 0).toFixed(2)}
-                </span>
-              </div>
-            </div>
-
             {/* Notification Center */}
             <div className="relative">
               <button
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
-                className="p-2 rounded-lg border border-border bg-bgDark/20 text-textSecondary hover:text-white hover:bg-white/5 relative cursor-pointer"
+                className="p-2 rounded-lg border border-border bg-bgDark/20 text-textSecondary hover:text-textPrimary hover:bg-bgDark relative cursor-pointer"
               >
                 <Bell size={16} />
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
               </button>
 
               {isNotifOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-bgCard border border-border rounded-xl shadow-2xl shadow-black/80 z-50 py-2 animate-scale-up">
+                <div className="absolute right-0 mt-2 w-80 bg-bgCard border border-border rounded-xl shadow-2xl shadow-black/10 z-50 py-2 animate-scale-up">
                   <div className="px-4 py-2 border-b border-border flex items-center justify-between">
                     <span className="text-xs font-bold text-textPrimary">Notifications Log</span>
                     <span className="text-[10px] text-primary-light font-semibold uppercase">New</span>
                   </div>
                   <div className="divide-y divide-border/40 max-h-60 overflow-y-auto">
                     {mockNotifications.map((notif) => (
-                      <div key={notif.id} className="p-3 text-xs hover:bg-white/5">
+                      <div key={notif.id} className="p-3 text-xs hover:bg-bgCardHover">
                         <p className="text-textSecondary leading-relaxed">{notif.text}</p>
                         <span className="text-[10px] text-textMuted mt-1 block">{notif.time}</span>
                       </div>
@@ -262,7 +243,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               {isUserDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsUserDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-48 bg-bgCard border border-border rounded-xl shadow-2xl shadow-black/85 z-50 py-1.5 animate-scale-up">
+                  <div className="absolute right-0 mt-2 w-48 bg-bgCard border border-border rounded-xl shadow-2xl shadow-black/10 z-50 py-1.5 animate-scale-up">
                     <div className="px-4 py-2 border-b border-border">
                       <p className="text-xs font-bold text-textPrimary truncate">{user?.name}</p>
                       <p className="text-[10px] text-textMuted truncate">@{user?.username}</p>
@@ -270,7 +251,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     <Link
                       to={ROUTES.PROFILE}
                       onClick={() => setIsUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-textSecondary hover:text-white hover:bg-white/5 transition-colors duration-150"
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-textSecondary hover:text-textPrimary hover:bg-bgCardHover transition-colors duration-150"
                     >
                       <User size={14} />
                       Profile Settings
@@ -293,8 +274,26 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </header>
 
         {/* Content Layout Body */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 animate-fade-in relative">
-          {children || <Outlet />}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 animate-fade-in relative overflow-hidden">
+          {/* Abstract geometric background patterns */}
+          <svg className="absolute top-0 right-0 w-[450px] h-[450px] text-primary/10 pointer-events-none z-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.4">
+            <circle cx="100" cy="0" r="30" />
+            <circle cx="100" cy="0" r="50" />
+            <circle cx="100" cy="0" r="70" />
+            <circle cx="100" cy="0" r="90" />
+            <circle cx="100" cy="0" r="110" />
+            <circle cx="100" cy="0" r="130" />
+          </svg>
+
+          <svg className="absolute bottom-0 left-0 w-[350px] h-[350px] text-primary/8 pointer-events-none z-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.4">
+            <path d="M-10,110 L110,-10 M-10,90 L90,-10 M-10,70 L70,-10 M-10,50 L50,-10 M-10,30 L30,-10" />
+            <polygon points="10,90 30,70 50,90" strokeDasharray="1,1" />
+            <polygon points="30,70 60,40 40,30" strokeDasharray="1,1" />
+          </svg>
+
+          <div className="relative z-10">
+            {children || <Outlet />}
+          </div>
         </main>
       </div>
     </div>

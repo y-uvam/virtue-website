@@ -1,7 +1,10 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useState, useEffect } from "react";
+import { supabase } from "./utils/supabase";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
-import { store } from "./store";
+import { store, useAppDispatch } from "./store";
+import { setSessionUser, mapProfileToUser } from "./store/slices/authSlice";
+import { type MockUser } from "./store/mockData";
 import { ToastProvider } from "./components/common/Toast";
 import { ROUTES } from "./constants/routes";
 
@@ -115,15 +118,96 @@ const AppRoutes: React.FC = () => (
   </Suspense>
 );
 
-// Root App — wrap with Redux Store + Toast + Router
-const App: React.FC = () => (
-  <Provider store={store}>
-    <ToastProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </ToastProvider>
-  </Provider>
-);
+// Auth Initializer to sync session updates with Redux
+const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    // 1. Initial check for an active user session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single()
+          .then(({ data, error }) => {
+            if (!error && data) {
+              dispatch(setSessionUser(mapProfileToUser(data, !!session.user.email_confirmed_at)));
+            } else {
+              // Fallback if profiles table is caching/missing
+              dispatch(setSessionUser({
+                id: session.user.id,
+                name: session.user.user_metadata?.full_name || "User",
+                username: session.user.user_metadata?.username || "user_" + session.user.id.substring(0, 6),
+                email: session.user.email || "",
+                role: "user",
+                balance: 0.00,
+                api_key: "",
+                referral_code: "",
+                status: "active",
+                email_verified: !!session.user.email_confirmed_at,
+                created_at: session.user.created_at,
+              } as MockUser));
+            }
+          });
+      } else {
+        dispatch(setSessionUser(null));
+      }
+    });
+
+    // 2. Setup auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single()
+          .then(({ data, error }) => {
+            if (!error && data) {
+              dispatch(setSessionUser(mapProfileToUser(data, !!session.user.email_confirmed_at)));
+            } else {
+              // Fallback if profiles table is caching/missing
+              dispatch(setSessionUser({
+                id: session.user.id,
+                name: session.user.user_metadata?.full_name || "User",
+                username: session.user.user_metadata?.username || "user_" + session.user.id.substring(0, 6),
+                email: session.user.email || "",
+                role: "user",
+                balance: 0.00,
+                api_key: "",
+                referral_code: "",
+                status: "active",
+                email_verified: !!session.user.email_confirmed_at,
+                created_at: session.user.created_at,
+              } as MockUser));
+            }
+          });
+      } else {
+        dispatch(setSessionUser(null));
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [dispatch]);
+
+  return <>{children}</>;
+};
+
+// Root App — wrap with Redux Store + Session Sync + Toast + Router
+const App: React.FC = () => {
+  return (
+    <Provider store={store}>
+      <AuthInitializer>
+        <ToastProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </ToastProvider>
+      </AuthInitializer>
+    </Provider>
+  );
+};
 
 export default App;

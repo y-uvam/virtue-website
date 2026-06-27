@@ -6,6 +6,7 @@ export interface MockUser {
   email: string;
   username: string;
   role: "user" | "admin";
+  isAdmin?: boolean;
   balance: number;
   api_key: string;
   referral_code: string;
@@ -129,10 +130,6 @@ const INITIAL_USERS: MockUser[] = [
 const INITIAL_CATEGORIES: MockCategory[] = [
   { id: "cat-ig", name: "Instagram Growth", icon: "instagram", sort_order: 1, status: "active" },
   { id: "cat-yt", name: "YouTube Traffic", icon: "youtube", sort_order: 2, status: "active" },
-  { id: "cat-tt", name: "TikTok Viral", icon: "tiktok", sort_order: 3, status: "active" },
-  { id: "cat-fb", name: "Facebook Reach", icon: "facebook", sort_order: 4, status: "active" },
-  { id: "cat-tw", name: "Twitter / X Marketing", icon: "twitter", sort_order: 5, status: "active" },
-  { id: "cat-tg", name: "Telegram Subscribers", icon: "telegram", sort_order: 6, status: "active" },
 ];
 
 const INITIAL_SERVICES: MockService[] = [
@@ -196,46 +193,6 @@ const INITIAL_SERVICES: MockService[] = [
     min_qty: 1000,
     max_qty: 500000,
     avg_time: "2 hours",
-    refill_available: true,
-    status: "active",
-  },
-
-  // TikTok Services
-  {
-    id: "srv-tt-1",
-    category_id: "cat-tt",
-    name: "TikTok Followers [High Quality / Safe Delivery]",
-    description: "Get stable TikTok followers. Average speed of 5k per day. Starts in 1 hour.",
-    rate: 190.00,
-    min_qty: 100,
-    max_qty: 100000,
-    avg_time: "30 minutes",
-    refill_available: true,
-    status: "active",
-  },
-  {
-    id: "srv-tt-2",
-    category_id: "cat-tt",
-    name: "TikTok Likes [Instant Start / Safe]",
-    description: "Viral boost likes. Immediate trigger upon placing the order.",
-    rate: 75.00,
-    min_qty: 100,
-    max_qty: 50000,
-    avg_time: "10 minutes",
-    refill_available: false,
-    status: "active",
-  },
-
-  // Telegram Services
-  {
-    id: "srv-tg-1",
-    category_id: "cat-tg",
-    name: "Telegram Channel Members [Ultra High Quality / Low Drop]",
-    description: "Real looking members for public and private Telegram channels/groups. Safe and reliable.",
-    rate: 90.00,
-    min_qty: 100,
-    max_qty: 20000,
-    avg_time: "1 hour",
     refill_available: true,
     status: "active",
   },
@@ -350,9 +307,9 @@ const INITIAL_TICKETS: MockTicket[] = [
 ];
 
 const DEFAULT_SETTINGS: MockSettings = {
-  siteName: "SMM Panel Pro",
+  siteName: "Virtue",
   tagline: "Unbeatable Social Media Growth Supplier",
-  contactEmail: "support@smmpanelpro.com",
+  contactEmail: "support@virtue.com",
   whatsappLink: "https://wa.me/1234567890",
   maintenanceMode: false,
   minOrderAmount: 100,
@@ -363,6 +320,13 @@ const DEFAULT_SETTINGS: MockSettings = {
 
 // Database Initialization Helper
 export const initMockDatabase = () => {
+  // If stored categories contain legacy platforms, trigger a cache reset
+  const storedCats = localStorage.getItem("smm_categories");
+  if (storedCats && (storedCats.includes("cat-tt") || storedCats.includes("cat-fb"))) {
+    localStorage.removeItem("smm_categories");
+    localStorage.removeItem("smm_services");
+  }
+
   if (!localStorage.getItem("smm_users")) {
     localStorage.setItem("smm_users", JSON.stringify(INITIAL_USERS));
   }
@@ -416,5 +380,10 @@ export const setActiveUser = (user: MockUser | null) => {
 };
 export const getSettings = (): MockSettings => {
   initMockDatabase();
-  return JSON.parse(localStorage.getItem("smm_settings")!);
+  const settings = JSON.parse(localStorage.getItem("smm_settings")!) as MockSettings;
+  if (settings && (settings.siteName.includes("SMM Panel") || settings.contactEmail.includes("smmpanel"))) {
+    localStorage.setItem("smm_settings", JSON.stringify(DEFAULT_SETTINGS));
+    return DEFAULT_SETTINGS;
+  }
+  return settings;
 };

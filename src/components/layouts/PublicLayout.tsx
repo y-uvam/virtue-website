@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, NavLink, useNavigate, Outlet } from "react-router-dom";
 import { CreditCard, Shield, ShieldCheck, Zap } from "lucide-react";
+import { VirtueLogo } from "../common/VirtueLogo";
 import { ROUTES } from "../../constants/routes";
 import { STRINGS } from "../../constants/strings";
 import { useAppSelector, useAppDispatch } from "../../store";
@@ -27,14 +28,29 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-info/10 rounded-full blur-[120px] pointer-events-none" />
 
+      {/* Abstract geometric background patterns */}
+      <svg className="absolute top-0 right-0 w-[550px] h-[550px] text-primary/10 pointer-events-none z-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.3">
+        <circle cx="100" cy="0" r="30" />
+        <circle cx="100" cy="0" r="50" />
+        <circle cx="100" cy="0" r="70" />
+        <circle cx="100" cy="0" r="90" />
+        <circle cx="100" cy="0" r="110" />
+        <circle cx="100" cy="0" r="130" />
+        <circle cx="100" cy="0" r="150" />
+      </svg>
+
+      <svg className="absolute bottom-0 left-0 w-[450px] h-[450px] text-primary/8 pointer-events-none z-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.3">
+        <path d="M-10,110 L110,-10 M-10,90 L90,-10 M-10,70 L70,-10 M-10,50 L50,-10 M-10,30 L30,-10" />
+        <polygon points="10,90 30,70 50,90" strokeDasharray="1,1" />
+        <polygon points="30,70 60,40 40,30" strokeDasharray="1,1" />
+      </svg>
+
       {/* Sticky Header Navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-bgDark/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to={ROUTES.HOME} className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-r from-primary to-info flex items-center justify-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
-              <Zap size={18} className="text-white fill-white/10" />
-            </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-white to-textSecondary bg-clip-text text-transparent">
+            <VirtueLogo size={38} className="transition-transform group-hover:scale-105" />
+            <span className="text-lg font-bold bg-gradient-to-r from-primary to-info bg-clip-text text-transparent">
               {STRINGS.APP.NAME}
             </span>
           </Link>
@@ -80,10 +96,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
               <Link to={ROUTES.HOME} className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary to-info flex items-center justify-center">
-                  <Zap size={16} className="text-white" />
-                </div>
-                <span className="text-base font-bold text-white">
+                <VirtueLogo size={36} />
+                <span className="text-base font-bold text-textPrimary">
                   {STRINGS.APP.NAME}
                 </span>
               </Link>
@@ -91,9 +105,9 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                 {STRINGS.LANDING.FOOTER_TEXT}
               </p>
               <div className="flex gap-4 text-xs text-textMuted font-medium">
-                <Link to={ROUTES.TERMS} className="hover:text-white transition-colors">Terms of Service</Link>
+                <Link to={ROUTES.TERMS} className="hover:text-primary transition-colors">Terms of Service</Link>
                 <span>•</span>
-                <Link to={ROUTES.PRIVACY} className="hover:text-white transition-colors">Privacy Policy</Link>
+                <Link to={ROUTES.PRIVACY} className="hover:text-primary transition-colors">Privacy Policy</Link>
               </div>
             </div>
 
@@ -103,17 +117,17 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
               </h4>
               <ul className="space-y-2 text-xs sm:text-sm">
                 <li>
-                  <Link to={ROUTES.HOME} className="text-textSecondary hover:text-white transition-colors">
+                  <Link to={ROUTES.HOME} className="text-textSecondary hover:text-primary transition-colors">
                     Home Page
                   </Link>
                 </li>
                 <li>
-                  <Link to={ROUTES.LOGIN} className="text-textSecondary hover:text-white transition-colors">
+                  <Link to={ROUTES.LOGIN} className="text-textSecondary hover:text-primary transition-colors">
                     Login
                   </Link>
                 </li>
                 <li>
-                  <Link to={ROUTES.REGISTER} className="text-textSecondary hover:text-white transition-colors">
+                  <Link to={ROUTES.REGISTER} className="text-textSecondary hover:text-primary transition-colors">
                     Register
                   </Link>
                 </li>
@@ -126,12 +140,12 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
               </h4>
               <ul className="space-y-2 text-xs sm:text-sm">
                 <li>
-                  <Link to={ROUTES.SUPPORT} className="text-textSecondary hover:text-white transition-colors">
+                  <Link to={ROUTES.SUPPORT} className="text-textSecondary hover:text-primary transition-colors">
                     Support Tickets
                   </Link>
                 </li>
                 <li>
-                  <Link to={ROUTES.API_DOCS} className="text-textSecondary hover:text-white transition-colors">
+                  <Link to={ROUTES.API_DOCS} className="text-textSecondary hover:text-primary transition-colors">
                     API Docs
                   </Link>
                 </li>

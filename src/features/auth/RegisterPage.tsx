@@ -15,6 +15,8 @@ import { ROUTES } from "../../constants/routes";
 import { STRINGS } from "../../constants/strings";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { registerUser, clearAuthError } from "../../store/slices/authSlice";
+import { supabase } from "../../utils/supabase";
+import { type MockUser } from "../../store/mockData";
 import { Button } from "../../components/common/Button";
 import { Input } from "../../components/common/Input";
 import { Alert } from "../../components/common/Alert";
@@ -29,6 +31,7 @@ export const RegisterPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   // Field validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -108,9 +111,71 @@ export const RegisterPage: React.FC = () => {
     );
 
     if (registerUser.fulfilled.match(resultAction)) {
-      navigate(ROUTES.DASHBOARD);
+      const payload = resultAction.payload as MockUser;
+      if (payload && payload.email_verified) {
+        navigate(ROUTES.DASHBOARD);
+      } else {
+        setIsRegistered(true);
+      }
     }
   };
+
+  if (isRegistered) {
+    return (
+      <div className="max-w-md mx-auto py-8 animate-scale-up text-center">
+        <Card className="p-8 space-y-6 relative overflow-hidden">
+          <div className="absolute top-[-50px] left-[-50px] w-28 h-28 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute bottom-[-50px] right-[-50px] w-28 h-28 bg-secondary/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-pulse">
+              <Mail size={28} />
+            </div>
+            <h1 className="text-2xl font-black text-textPrimary">Verify Your Email</h1>
+            <p className="text-sm text-textSecondary leading-relaxed">
+              We have sent a verification link to your email address:<br />
+              <strong className="text-primary font-bold">{email}</strong>
+            </p>
+            <p className="text-xs text-textMuted max-w-xs leading-relaxed mx-auto">
+              Please check your inbox and click the verification link to activate your account. If you don't see it, check your spam folder.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Link to={ROUTES.LOGIN} className="block">
+              <Button variant="primary" className="w-full">
+                Go to Sign In
+              </Button>
+            </Link>
+            
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={async () => {
+                setFormError("");
+                const { error: resendError } = await supabase.auth.resend({
+                  type: 'signup',
+                  email: email,
+                  options: {
+                    emailRedirectTo: `${window.location.origin}/login`
+                  }
+                });
+                if (resendError) {
+                  setFormError(resendError.message);
+                } else {
+                  alert("A new verification link has been sent to your email!");
+                }
+              }}
+            >
+              Resend Verification Link
+            </Button>
+          </div>
+          
+          {formError && <Alert variant="error" className="mt-4">{formError}</Alert>}
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto py-8">

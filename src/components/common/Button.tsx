@@ -28,11 +28,11 @@ export const Button: React.FC<ButtonProps> = ({
     primary:
       "bg-gradient-to-r from-primary to-info text-white hover:brightness-110 shadow-lg shadow-primary/25 border border-transparent",
     secondary:
-      "bg-bgCard hover:bg-bgCardHover text-textSecondary hover:text-white border border-border",
+      "bg-bgCard hover:bg-bgCardHover text-textSecondary hover:text-textPrimary border border-border",
     danger:
       "bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/25",
     ghost:
-      "bg-transparent hover:bg-white/5 text-textSecondary hover:text-white border border-transparent",
+      "bg-transparent hover:bg-bgDark/60 text-textSecondary hover:text-textPrimary border border-transparent",
     outline:
       "bg-transparent hover:bg-primary/5 text-primary hover:text-primary-light border border-primary/40",
   };

@@ -258,7 +258,7 @@ export const NewOrderPage: React.FC = () => {
           <Card variant="bordered" className="p-5 border-dashed border-primary/20 bg-primary/5 text-xs text-textSecondary leading-relaxed space-y-2">
             <h4 className="font-bold text-white flex items-center gap-1">
               <ShieldCheck size={14} className="text-primary-light" />
-              SMM Panel Guidelines
+              Our Guidelines
             </h4>
             <p>1. Please ensure your target profile or video link is public. Private links cannot receive growth and are unrefundable.</p>
             <p>2. Do not place duplicate orders for the same link while the first order is in progress.</p>
