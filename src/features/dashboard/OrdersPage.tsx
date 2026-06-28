@@ -227,20 +227,6 @@ export const OrdersPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Search bar */}
-        <div className="w-full md:w-80 relative flex items-center">
-          <Search size={14} className="absolute left-3 text-textMuted pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search by ID or Link..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-bgCard border border-border text-xs text-textPrimary placeholder-textMuted outline-none focus:border-primary transition-all"
-          />
-        </div>
       </div>
 
       {/* Orders Table */}

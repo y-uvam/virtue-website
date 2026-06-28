@@ -77,7 +77,7 @@ export const Select: React.FC<SelectProps> = ({
               <span className="font-medium">{selectedOption.label}</span>
               {selectedOption.subLabel && (
                 <span className="text-xs text-textMuted font-normal truncate hidden sm:inline">
-                  — {selectedOption.subLabel}
+                  - {selectedOption.subLabel}
                 </span>
               )}
             </>
@@ -89,7 +89,7 @@ export const Select: React.FC<SelectProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-bgCard border border-border rounded-lg shadow-xl shadow-black/60 z-50 max-h-60 flex flex-col overflow-hidden animate-fade-in">
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-bgCard border border-border rounded-lg shadow-xl shadow-black/60 z-50 max-h-60 flex flex-col overflow-hidden animate-fade-in bg-white">
           {searchable && (
             <div className="p-2 border-b border-border flex items-center gap-2 bg-bgDark/40">
               <Search size={14} className="text-textMuted" />

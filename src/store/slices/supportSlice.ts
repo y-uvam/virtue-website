@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { type MockTicket, type MockTicketMessage, dbGet, dbSet } from "../mockData";
+import { type MockTicket, type MockTicketMessage } from "../mockData";
+import { supabase } from "../../utils/supabase";
 
 interface SupportState {
   tickets: MockTicket[];
@@ -15,15 +16,27 @@ const initialState: SupportState = {
   error: null,
 };
 
-const delay = (ms = 400) => new Promise((res) => setTimeout(res, ms));
+const sortTicketMessages = (tickets: any[]): MockTicket[] => {
+  return tickets.map((t) => ({
+    ...t,
+    messages: (t.messages || []).sort(
+      (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    ),
+  })) as MockTicket[];
+};
 
 export const fetchUserTickets = createAsyncThunk(
   "support/fetchUserTickets",
   async (userId: string, { rejectWithValue }) => {
-    await delay();
     try {
-      const tickets = dbGet<MockTicket[]>("smm_tickets");
-      return tickets.filter((t) => t.user_id === userId);
+      const { data, error } = await supabase
+        .from("tickets")
+        .select("*, messages:ticket_messages(*)")
+        .eq("user_id", userId)
+        .order("last_updated", { ascending: false });
+
+      if (error) throw error;
+      return sortTicketMessages(data || []);
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to load tickets");
     }
@@ -48,39 +61,48 @@ export const createTicket = createAsyncThunk(
     },
     { rejectWithValue }
   ) => {
-    await delay();
     if (!subject.trim()) return rejectWithValue("Subject is required.");
     if (!message.trim()) return rejectWithValue("Message description is required.");
 
     try {
-      const tickets = dbGet<MockTicket[]>("smm_tickets");
-      const newTicket: MockTicket = {
-        id: `tkt-${Math.floor(200 + Math.random() * 800)}`,
+      const ticketId = `tkt-${Math.floor(200 + Math.random() * 800)}`;
+      const newTicket = {
+        id: ticketId,
         user_id: userId,
         subject,
         category,
         status: "open",
         created_at: new Date().toISOString(),
         last_updated: new Date().toISOString(),
-        messages: [
-          {
-            id: `msg-${Math.random().toString(36).substring(2, 9)}`,
-            ticket_id: "", // filled below
-            sender_type: "user",
-            sender_name: userName,
-            message,
-            created_at: new Date().toISOString(),
-          },
-        ],
       };
-      
-      newTicket.messages[0].ticket_id = newTicket.id;
-      tickets.unshift(newTicket);
-      dbSet("smm_tickets", tickets);
 
-      return newTicket;
+      // 1. Create ticket
+      const { error: ticketError } = await supabase
+        .from("tickets")
+        .insert(newTicket);
+      if (ticketError) throw ticketError;
+
+      // 2. Create initial ticket message
+      const initialMessage = {
+        ticket_id: ticketId,
+        sender_type: "user",
+        sender_name: userName,
+        message,
+        created_at: new Date().toISOString(),
+      };
+
+      const { data: insertedMsgs, error: msgError } = await supabase
+        .from("ticket_messages")
+        .insert(initialMessage)
+        .select();
+      if (msgError) throw msgError;
+
+      return {
+        ...newTicket,
+        messages: insertedMsgs || [],
+      } as MockTicket;
     } catch (err: any) {
-      return rejectWithValue("Failed to create ticket.");
+      return rejectWithValue(err.message || "Failed to create ticket.");
     }
   }
 );
@@ -101,16 +123,11 @@ export const replyToTicket = createAsyncThunk(
     },
     { rejectWithValue }
   ) => {
-    await delay();
     if (!message.trim()) return rejectWithValue("Message cannot be empty.");
 
     try {
-      const tickets = dbGet<MockTicket[]>("smm_tickets");
-      const idx = tickets.findIndex((t) => t.id === ticketId);
-      if (idx === -1) return rejectWithValue("Ticket not found.");
-
-      const newMsg: MockTicketMessage = {
-        id: `msg-${Math.random().toString(36).substring(2, 9)}`,
+      // 1. Insert new message
+      const newMsg = {
         ticket_id: ticketId,
         sender_type: senderType,
         sender_name: senderName,
@@ -118,25 +135,45 @@ export const replyToTicket = createAsyncThunk(
         created_at: new Date().toISOString(),
       };
 
-      tickets[idx].messages.push(newMsg);
-      tickets[idx].status = senderType === "admin" ? "replied" : "open";
-      tickets[idx].last_updated = new Date().toISOString();
-      dbSet("smm_tickets", tickets);
+      const { error: msgInsertError } = await supabase
+        .from("ticket_messages")
+        .insert(newMsg);
+      if (msgInsertError) throw msgInsertError;
 
-      return tickets[idx];
+      // 2. Update status and timestamp in tickets table
+      const newStatus = senderType === "admin" ? "replied" : "open";
+      const { error: ticketUpdateError } = await supabase
+        .from("tickets")
+        .update({ status: newStatus, last_updated: new Date().toISOString() })
+        .eq("id", ticketId);
+      if (ticketUpdateError) throw ticketUpdateError;
+
+      // 3. Retrieve complete updated ticket
+      const { data: ticket, error: fetchError } = await supabase
+        .from("tickets")
+        .select("*, messages:ticket_messages(*)")
+        .eq("id", ticketId)
+        .single();
+      if (fetchError || !ticket) throw fetchError || new Error("Failed to load updated ticket");
+
+      return sortTicketMessages([ticket])[0];
     } catch (err: any) {
-      return rejectWithValue("Failed to reply.");
+      return rejectWithValue(err.message || "Failed to reply.");
     }
   }
 );
 
-
 export const fetchTickets = createAsyncThunk(
   "support/fetchAll",
   async (_, { rejectWithValue }) => {
-    await delay();
     try {
-      return dbGet<MockTicket[]>("smm_tickets");
+      const { data, error } = await supabase
+        .from("tickets")
+        .select("*, messages:ticket_messages(*)")
+        .order("last_updated", { ascending: false });
+
+      if (error) throw error;
+      return sortTicketMessages(data || []);
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to load all tickets");
     }
@@ -146,22 +183,27 @@ export const fetchTickets = createAsyncThunk(
 export const closeTicket = createAsyncThunk(
   "support/close",
   async (ticketId: string, { rejectWithValue }) => {
-    await delay();
     try {
-      const tickets = dbGet<MockTicket[]>("smm_tickets");
-      const idx = tickets.findIndex((t) => t.id === ticketId);
-      if (idx === -1) return rejectWithValue("Ticket not found.");
+      const { error: updateError } = await supabase
+        .from("tickets")
+        .update({ status: "closed", last_updated: new Date().toISOString() })
+        .eq("id", ticketId);
+      if (updateError) throw updateError;
 
-      tickets[idx].status = "closed";
-      tickets[idx].last_updated = new Date().toISOString();
-      dbSet("smm_tickets", tickets);
+      const { data: ticket, error: fetchError } = await supabase
+        .from("tickets")
+        .select("*, messages:ticket_messages(*)")
+        .eq("id", ticketId)
+        .single();
+      if (fetchError || !ticket) throw fetchError || new Error("Failed to load ticket");
 
-      return tickets[idx];
+      return sortTicketMessages([ticket])[0];
     } catch (err: any) {
-      return rejectWithValue("Failed to close ticket.");
+      return rejectWithValue(err.message || "Failed to close ticket.");
     }
   }
 );
+
 export const resolveTicket = closeTicket;
 
 const supportSlice = createSlice({
@@ -174,7 +216,6 @@ const supportSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      
       .addCase(fetchTickets.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -187,7 +228,6 @@ const supportSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-
       .addCase(fetchUserTickets.pending, (state) => {
         state.loading = true;
         state.error = null;

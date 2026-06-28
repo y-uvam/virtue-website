@@ -81,11 +81,11 @@ export const DashboardHome: React.FC = () => {
             Manage your social growth campaigns from your control console.
           </p>
         </div>
-        <Link to={ROUTES.NEW_ORDER}>
+        {/* <Link to={ROUTES.NEW_ORDER}>
           <Button size="sm" icon={<Zap size={14} />}>
             New Campaign
           </Button>
-        </Link>
+        </Link> */}
       </div>
 
       {/* Stats Cards Row */}
@@ -104,7 +104,7 @@ export const DashboardHome: React.FC = () => {
       </div>
 
       {/* Platform Shortcuts */}
-      <section className="space-y-3">
+      {/* <section className="space-y-3">
         <h4 className="text-xs font-bold text-textSecondary uppercase tracking-wider">
           {STRINGS.DASHBOARD.SHORTCUTS_TITLE}
         </h4>
@@ -120,7 +120,7 @@ export const DashboardHome: React.FC = () => {
             </button>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Recent Orders */}
       <div className="space-y-3 pt-2">

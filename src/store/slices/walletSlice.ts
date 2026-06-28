@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { type MockTransaction, type MockUser, dbGet, dbSet } from "../mockData";
+import { type MockTransaction } from "../mockData";
+import { supabase } from "../../utils/supabase";
 import { syncUserBalance } from "./authSlice";
 
 interface WalletState {
@@ -14,15 +15,18 @@ const initialState: WalletState = {
   error: null,
 };
 
-const delay = (ms = 500) => new Promise((res) => setTimeout(res, ms));
-
 export const fetchTransactions = createAsyncThunk(
   "wallet/fetchTransactions",
   async (userId: string, { rejectWithValue }) => {
-    await delay();
     try {
-      const transactions = dbGet<MockTransaction[]>("smm_transactions");
-      return transactions.filter((tx) => tx.user_id === userId);
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as MockTransaction[];
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to load transactions");
     }
@@ -43,26 +47,31 @@ export const addFunds = createAsyncThunk(
     },
     { dispatch, rejectWithValue }
   ) => {
-    await delay(1200); // slightly longer delay to simulate external Razorpay gateway callback
-    
     if (amount < 100) return rejectWithValue("Minimum deposit is ₹100.");
     if (amount > 50000) return rejectWithValue("Maximum deposit is ₹50,000.");
 
     try {
-      const users = dbGet<MockUser[]>("smm_users");
-      const transactions = dbGet<MockTransaction[]>("smm_transactions");
-      
-      const uIdx = users.findIndex((u) => u.id === userId);
-      if (uIdx === -1) return rejectWithValue("User not found.");
+      // 1. Fetch fresh profile
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("balance")
+        .eq("id", userId)
+        .single();
+      if (profileError || !profile) return rejectWithValue("User not found.");
 
-      const oldBalance = users[uIdx].balance;
-      const newBalance = Number((oldBalance + amount).toFixed(2));
-      users[uIdx].balance = newBalance;
-      dbSet("smm_users", users);
+      const newBalance = Number((Number(profile.balance) + amount).toFixed(2));
 
-      // Create transaction
-      const newTx: MockTransaction = {
-        id: `tx-${Math.floor(100 + Math.random() * 900)}`,
+      // 2. Update balance in database
+      const { error: balanceUpdateError } = await supabase
+        .from("profiles")
+        .update({ balance: newBalance })
+        .eq("id", userId);
+      if (balanceUpdateError) throw balanceUpdateError;
+
+      // 3. Create transaction log in database
+      const txId = `tx-${Math.floor(100 + Math.random() * 900)}`;
+      const newTx = {
+        id: txId,
         user_id: userId,
         type: "credit",
         amount,
@@ -73,11 +82,15 @@ export const addFunds = createAsyncThunk(
         created_at: new Date().toISOString(),
       };
 
-      transactions.unshift(newTx);
-      dbSet("smm_transactions", transactions);
+      const { error: txInsertError } = await supabase
+        .from("transactions")
+        .insert(newTx);
+      if (txInsertError) throw txInsertError;
 
+      // 4. Sync client state
       dispatch(syncUserBalance(newBalance));
-      return newTx;
+
+      return newTx as MockTransaction;
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to add funds.");
     }

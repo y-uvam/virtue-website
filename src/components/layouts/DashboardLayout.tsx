@@ -72,8 +72,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       {/* Sidebar - Desktop Layout */}
       <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-bgCard/60 backdrop-blur-md shrink-0">
         {/* Brand Header */}
-        <div className="h-16 px-6 border-b border-border flex items-center gap-2.5">
-          <VirtueLogo size={38} />
+        <div className="h-16 px-6 border-b border-border flex items-center">
+          <VirtueLogo size={38} className="-mr-2" />
           <span className="text-base font-bold text-textPrimary">{STRINGS.APP.NAME}</span>
         </div>
 
@@ -131,8 +131,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
           <aside className="relative flex flex-col w-64 bg-bgCard border-r border-border h-full z-10 animate-slide-in">
             <div className="h-16 px-6 border-b border-border flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <VirtueLogo size={36} />
+              <div className="flex items-center">
+                <VirtueLogo size={36} className="-mr-1.5" />
                 <span className="text-sm font-bold text-textPrimary">{STRINGS.APP.NAME}</span>
               </div>
               <button onClick={() => setIsSidebarOpen(false)} className="text-textMuted hover:text-textPrimary cursor-pointer">
@@ -275,21 +275,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
         {/* Content Layout Body */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 animate-fade-in relative overflow-hidden">
-          {/* Abstract geometric background patterns */}
-          <svg className="absolute top-0 right-0 w-[450px] h-[450px] text-primary/10 pointer-events-none z-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.4">
-            <circle cx="100" cy="0" r="30" />
-            <circle cx="100" cy="0" r="50" />
-            <circle cx="100" cy="0" r="70" />
-            <circle cx="100" cy="0" r="90" />
-            <circle cx="100" cy="0" r="110" />
-            <circle cx="100" cy="0" r="130" />
-          </svg>
-
-          <svg className="absolute bottom-0 left-0 w-[350px] h-[350px] text-primary/8 pointer-events-none z-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.4">
-            <path d="M-10,110 L110,-10 M-10,90 L90,-10 M-10,70 L70,-10 M-10,50 L50,-10 M-10,30 L30,-10" />
-            <polygon points="10,90 30,70 50,90" strokeDasharray="1,1" />
-            <polygon points="30,70 60,40 40,30" strokeDasharray="1,1" />
-          </svg>
 
           <div className="relative z-10">
             {children || <Outlet />}

@@ -44,7 +44,12 @@ export const NewOrderPage: React.FC = () => {
     }
   }, [categories, selectedCatId]);
 
-  const filteredServices = services.filter((s) => s.category_id === selectedCatId);
+  const filteredServices = services.filter((s) => {
+    if (selectedCatId === "cat-ig-trending") {
+      return ["1", "19", "24", "3", "20", "11", "27", "4"].includes(s.id);
+    }
+    return s.category_id === selectedCatId;
+  });
 
   useEffect(() => {
     if (filteredServices.length > 0) {
@@ -83,10 +88,10 @@ export const NewOrderPage: React.FC = () => {
       setFormError(`Maximum quantity is ${activeService.max_qty}.`);
       return;
     }
-    if (user && user.balance < price) {
-      setFormError("Insufficient wallet balance. Please add funds.");
-      return;
-    }
+    // if (user && user.balance < price) {
+    //   setFormError("Insufficient wallet balance. Please add funds.");
+    //   return;
+    // }
 
     setShowConfirmModal(true);
   };
@@ -148,8 +153,8 @@ export const NewOrderPage: React.FC = () => {
               label="Select Service"
               options={filteredServices.map((s) => ({
                 value: s.id,
-                label: s.name,
-                subLabel: `Rate: ₹${s.rate.toFixed(2)} per 1K — Min ${s.min_qty}`,
+                label: `${s.id} - ${s.name}`,
+                subLabel: `₹${s.rate.toFixed(2)} per 1000`,
               }))}
               value={selectedSrvId}
               onChange={setSelectedSrvId}
@@ -211,50 +216,6 @@ export const NewOrderPage: React.FC = () => {
 
         {/* Info panel */}
         <div className="space-y-6 md:col-span-1">
-          {activeService ? (
-            <Card className="p-5 space-y-4">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider border-b border-border pb-2 flex items-center gap-1.5">
-                <Info size={14} className="text-primary-light" />
-                {STRINGS.DASHBOARD.SERVICE_DETAILS}
-              </h3>
-              <div className="space-y-3.5 text-xs">
-                <div>
-                  <span className="text-textMuted block uppercase font-bold text-[9px] tracking-wider">Service Name</span>
-                  <span className="text-textPrimary font-semibold">{activeService.name}</span>
-                </div>
-
-                <div>
-                  <span className="text-textMuted block uppercase font-bold text-[9px] tracking-wider">Rate per 1,000</span>
-                  <span className="text-primary-light font-bold text-sm">₹{activeService.rate.toFixed(2)}</span>
-                </div>
-
-                <div>
-                  <span className="text-textMuted block uppercase font-bold text-[9px] tracking-wider">Average Start Time</span>
-                  <span className="text-white font-semibold">{activeService.avg_time}</span>
-                </div>
-
-                <div>
-                  <span className="text-textMuted block uppercase font-bold text-[9px] tracking-wider">Description</span>
-                  <p className="text-textSecondary leading-relaxed">{activeService.description}</p>
-                </div>
-
-                <div className="flex items-center gap-2 pt-2 border-t border-border/40">
-                  <span className="text-textMuted text-[9px] font-bold uppercase tracking-wider">Guaranteed:</span>
-                  {activeService.refill_available ? (
-                    <Badge status="completed" className="text-[9px] !py-0">30 Days Refill</Badge>
-                  ) : (
-                    <Badge status="cancelled" className="text-[9px] !py-0">No Refill</Badge>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ) : (
-            <Card className="p-5 text-center py-10 text-textMuted text-xs flex flex-col items-center justify-center gap-2">
-              <HelpCircle size={28} />
-              <span>Select a category and service to view specifications</span>
-            </Card>
-          )}
-
           <Card variant="bordered" className="p-5 border-dashed border-primary/20 bg-primary/5 text-xs text-textSecondary leading-relaxed space-y-2">
             <h4 className="font-bold text-white flex items-center gap-1">
               <ShieldCheck size={14} className="text-primary-light" />
@@ -287,22 +248,32 @@ export const NewOrderPage: React.FC = () => {
             <p className="text-textSecondary leading-relaxed">
               You are placing a social growth campaign order. Review the campaign specifics before checking out:
             </p>
-            <div className="p-4 rounded-lg bg-bgDark border border-border space-y-2.5">
-              <div className="flex justify-between">
-                <span className="text-textMuted">Service:</span>
-                <span className="font-semibold text-white truncate max-w-xs">{activeService.name}</span>
+            <div
+              style={{
+                padding: "16px 18px",
+                borderRadius: "12px",
+                background: "rgba(255, 255, 255, 1)",
+                border: "1px solid rgba(255,255,255,0.09)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                <span style={{ color: "#94a3b8", fontSize: "13px", minWidth: "100px" }}>Service:</span>
+                <span style={{ color: "#f1f5f9", fontWeight: 600, fontSize: "13px", textAlign: "right" }}>{activeService.name}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-textMuted">Target Link:</span>
-                <span className="font-semibold text-white truncate max-w-xs">{link}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                <span style={{ color: "#94a3b8", fontSize: "13px", minWidth: "100px" }}>Target Link:</span>
+                <span style={{ color: "#f1f5f9", fontWeight: 600, fontSize: "13px", textAlign: "right", wordBreak: "break-all", maxWidth: "260px" }}>{link}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-textMuted">Quantity:</span>
-                <span className="font-semibold text-white">{quantity}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
+                <span style={{ color: "#94a3b8", fontSize: "13px" }}>Quantity:</span>
+                <span style={{ color: "#f1f5f9", fontWeight: 600, fontSize: "13px" }}>{quantity.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-border/40 font-bold">
-                <span className="text-textSecondary">Deducted Price:</span>
-                <span className="text-primary-light text-base">₹{price.toFixed(2)}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+                <span style={{ color: "#e2e8f0", fontWeight: 700, fontSize: "14px" }}>Deducted Price:</span>
+                <span style={{ color: "#38bdf8", fontWeight: 800, fontSize: "18px" }}>₹{price.toFixed(2)}</span>
               </div>
             </div>
             <p className="text-[11px] text-textMuted leading-normal">
