@@ -51,6 +51,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     { label: STRINGS.DASHBOARD.NAV_ORDERS, path: ROUTES.ORDERS, icon: <ShoppingBag size={18} /> },
     { label: STRINGS.DASHBOARD.NAV_SERVICES, path: ROUTES.SERVICES, icon: <Layers size={18} /> },
     { label: STRINGS.DASHBOARD.NAV_PROFILE, path: ROUTES.PROFILE, icon: <User size={18} /> },
+    { label: STRINGS.DASHBOARD.NAV_CONTACT, path: ROUTES.CONTACT, icon: <HelpCircle size={18} /> },
   ];
 
   const getPageTitle = () => {

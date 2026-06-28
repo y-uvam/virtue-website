@@ -128,26 +128,7 @@ export const LoginPage: React.FC = () => {
           </Button>
         </form>
 
-        <div className="relative flex items-center justify-center my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border/60" />
-          </div>
-          <span className="relative px-3 bg-bgCard text-[11px] text-textMuted font-semibold uppercase tracking-wider">
-            Or
-          </span>
-        </div>
-
-        <Button
-          variant="secondary"
-          className="w-full flex items-center justify-center gap-2"
-          onClick={() => {
-            // Simulated OAuth trigger
-          }}
-          disabled={loading}
-          icon={<Chrome size={16} />}
-        >
-          {STRINGS.AUTH.GOOGLE_OAUTH}
-        </Button>
+       
 
         <p className="text-center text-xs text-textSecondary pt-2">
           {STRINGS.AUTH.NO_ACCOUNT}{" "}

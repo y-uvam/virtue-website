@@ -16,6 +16,7 @@ export const ROUTES = {
   SUPPORT: "/dashboard/support",
   API_DOCS: "/dashboard/api",
   AFFILIATE: "/dashboard/affiliate",
+  CONTACT: "/dashboard/contact",
   ADMIN: "/admin",
   ADMIN_USERS: "/admin/users",
   ADMIN_ORDERS: "/admin/orders",
@@ -24,6 +25,7 @@ export const ROUTES = {
   ADMIN_PAYMENTS: "/admin/payments",
   ADMIN_SETTINGS: "/admin/settings",
   ADMIN_TICKETS: "/admin/tickets",
+  ADMIN_CONTACT_REQUESTS: "/admin/contact-requests",
   TERMS: "/terms",
   PRIVACY: "/privacy",
 } as const;

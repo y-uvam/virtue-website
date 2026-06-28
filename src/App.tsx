@@ -43,6 +43,7 @@ const ProfilePage = lazy(() => import("./features/dashboard/ProfilePage").then((
 const SupportPage = lazy(() => import("./features/dashboard/SupportPage").then((m) => ({ default: m.SupportPage })));
 const ApiDocsPage = lazy(() => import("./features/dashboard/ApiDocsPage").then((m) => ({ default: m.ApiDocsPage })));
 const AffiliatePage = lazy(() => import("./features/dashboard/AffiliatePage").then((m) => ({ default: m.AffiliatePage })));
+const ContactUsPage = lazy(() => import("./features/dashboard/ContactUsPage").then((m) => ({ default: m.ContactUsPage })));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("./features/admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard })));
@@ -53,6 +54,7 @@ const ManageCategories = lazy(() => import("./features/admin/ManageCategories").
 const ManagePayments = lazy(() => import("./features/admin/ManagePayments").then((m) => ({ default: m.ManagePayments })));
 const ManageTickets = lazy(() => import("./features/admin/ManageTickets").then((m) => ({ default: m.ManageTickets })));
 const SiteSettings = lazy(() => import("./features/admin/SiteSettings").then((m) => ({ default: m.SiteSettings })));
+const ManageContactRequests = lazy(() => import("./features/admin/ManageContactRequests").then((m) => ({ default: m.ManageContactRequests })));
 
 // Full-page loading fallback
 const PageLoader = () => (
@@ -95,6 +97,7 @@ const AppRoutes: React.FC = () => (
           <Route path={ROUTES.SUPPORT} element={<SupportPage />} />
           <Route path={ROUTES.API_DOCS} element={<ApiDocsPage />} />
           <Route path={ROUTES.AFFILIATE} element={<AffiliatePage />} />
+          <Route path={ROUTES.CONTACT} element={<ContactUsPage />} />
         </Route>
       </Route>
 
@@ -109,6 +112,7 @@ const AppRoutes: React.FC = () => (
           <Route path={ROUTES.ADMIN_PAYMENTS} element={<ManagePayments />} />
           <Route path={ROUTES.ADMIN_TICKETS} element={<ManageTickets />} />
           <Route path={ROUTES.ADMIN_SETTINGS} element={<SiteSettings />} />
+          <Route path={ROUTES.ADMIN_CONTACT_REQUESTS} element={<ManageContactRequests />} />
         </Route>
       </Route>
 

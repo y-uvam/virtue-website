@@ -57,7 +57,7 @@ export const Modal: React.FC<ModalProps> = ({
         className="fixed inset-0 animate-fade-in"
         onClick={onClose}
         style={{
-          background: "rgba(0, 0, 0, 0.72)",
+          background: "rgba(255, 255, 255, 0.72)",
           backdropFilter: "blur(8px)",
           WebkitBackdropFilter: "blur(8px)",
         }}
@@ -68,10 +68,9 @@ export const Modal: React.FC<ModalProps> = ({
         ref={dialogRef}
         className={`relative w-full ${sizeClasses[size]} flex flex-col overflow-hidden z-10`}
         style={{
-          background: "linear-gradient(145deg, #1e2130, #151824)",
+          background: "linear-gradient(145deg, #c3e9ffff, #ffffffff)",
           border: "1px solid rgba(255,255,255,0.10)",
           borderRadius: "20px",
-          boxShadow: "0 40px 120px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset",
           animation: "modal-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
         role="dialog"
@@ -100,7 +99,7 @@ export const Modal: React.FC<ModalProps> = ({
             borderBottom: "1px solid rgba(255,255,255,0.07)",
           }}
         >
-          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#f1f5f9", letterSpacing: "0.01em" }}>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#000000ff", letterSpacing: "0.01em" }}>
             {title}
           </h3>
           <button

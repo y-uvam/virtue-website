@@ -202,3 +202,31 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Create Contact Requests Table
+create table if not exists public.contact_requests (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  description text not null,
+  instagram_username text not null,
+  image_url text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable RLS on contact_requests
+alter table public.contact_requests enable row level security;
+
+-- Policies for contact_requests
+create policy "Allow users to read their own contact requests" 
+  on public.contact_requests for select 
+  using (auth.uid() = user_id);
+
+create policy "Allow users to insert their own contact requests" 
+  on public.contact_requests for insert 
+  with check (auth.uid() = user_id);
+
+create policy "Allow admins full access on contact requests" 
+  on public.contact_requests for all 
+  using (
+    exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.role = 'admin')
+  );

@@ -15,6 +15,7 @@ import {
   LogOut,
   User,
   Zap,
+  Inbox,
 } from "lucide-react";
 import { ROUTES } from "../../constants/routes";
 import { STRINGS } from "../../constants/strings";
@@ -48,6 +49,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { label: STRINGS.ADMIN.NAV_MANAGE_CATEGORIES, path: ROUTES.ADMIN_CATEGORIES, icon: <Grid size={18} /> },
     { label: STRINGS.ADMIN.NAV_MANAGE_PAYMENTS, path: ROUTES.ADMIN_PAYMENTS, icon: <CreditCard size={18} /> },
     { label: STRINGS.ADMIN.NAV_MANAGE_TICKETS, path: ROUTES.ADMIN_TICKETS, icon: <MessageSquare size={18} /> },
+    { label: STRINGS.ADMIN.NAV_CONTACT_REQUESTS, path: ROUTES.ADMIN_CONTACT_REQUESTS, icon: <Inbox size={18} /> },
     { label: STRINGS.ADMIN.NAV_SETTINGS, path: ROUTES.ADMIN_SETTINGS, icon: <Settings size={18} /> },
   ];
 
